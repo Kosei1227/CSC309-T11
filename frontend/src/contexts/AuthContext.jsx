@@ -17,11 +17,13 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) {
             setUser(null);
+            setLoading(false);
             return;
         }
         fetch(`${BACKEND_URL}/user/me`, {
@@ -32,8 +34,13 @@ export const AuthProvider = ({ children }) => {
         .catch(() => {
             localStorage.removeItem("token");
             setUser(null);
-        });
+        })
+        .finally(() => setLoading(false));
     }, []);
+
+    if (loading) {
+        return null;
+    }
 
     /*
      * Logout the currently authenticated user.
